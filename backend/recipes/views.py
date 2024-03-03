@@ -33,9 +33,9 @@ class RecipesViewSet(viewsets.ModelViewSet):
                 user=request.user, recipes=recipe
             ).delete()
             return Response(
-                {'detail': "Рецепт удален из списка покупок."},
-                status=status.HTTP_204_NO_CONTENT
-                )
+                {"detail": "Рецепт удален из списка покупок."},
+                status=status.HTTP_204_NO_CONTENT,
+            )
 
         shopping_cart_item, created = ShoppingCart.objects.get_or_create(
             user=request.user, recipes=recipe
@@ -67,9 +67,9 @@ class RecipesViewSet(viewsets.ModelViewSet):
                 user=request.user, recipes=recipe
             ).delete()
             return Response(
-                {'detail': "Рецепт удален из избранного."},
-                status=status.HTTP_204_NO_CONTENT
-                )
+                {"detail": "Рецепт удален из избранного."},
+                status=status.HTTP_204_NO_CONTENT,
+            )
 
         favorite, created = FavoriteRecipe.objects.get_or_create(
             user=request.user, recipes=recipe
