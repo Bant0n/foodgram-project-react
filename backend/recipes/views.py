@@ -2,13 +2,22 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .models import Recipes, ShoppingCart, FavoriteRecipe
-from .serializers import RecipesSerializer, RecipesCreateSerializer
+from .models import FavoriteRecipe, Recipes, ShoppingCart
+from .serializers import RecipesCreateSerializer, RecipesSerializer
+from django.shortcuts import get_object_or_404
 
 
 class RecipesViewSet(viewsets.ModelViewSet):
     queryset = Recipes.objects.all()
-    # serializer_class = RecipesSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated:
+            qs = Recipes.favorite_and_shopping_cart.favorite_and_shopping_cart(
+                self.request.user
+            )
+        else:
+            qs = Recipes.objects.all()
+        return qs
 
     def get_serializer_class(self):
         if self.action in ("create", "update"):
@@ -18,24 +27,9 @@ class RecipesViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(methods=["post", "delete"], detail=True)
+    @action(methods=["post"], detail=True)
     def add_shopping_cart(self, request, pk=None):
-        try:
-            recipe = Recipes.objects.get(pk=pk)
-        except Recipes.DoesNotExist:
-            return Response(
-                {"detail": "Рецепт не найден."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        if request.method == "DELETE":
-            ShoppingCart.objects.filter(
-                user=request.user, recipes=recipe
-            ).delete()
-            return Response(
-                {"detail": "Рецепт удален из списка покупок."},
-                status=status.HTTP_204_NO_CONTENT,
-            )
+        recipe = get_object_or_404(Recipes, pk=pk)
 
         shopping_cart_item, created = ShoppingCart.objects.get_or_create(
             user=request.user, recipes=recipe
@@ -52,24 +46,18 @@ class RecipesViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_200_OK,
             )
 
-    @action(methods=["post", "delete"], detail=True)
-    def favorite(self, request, pk=None):
-        try:
-            recipe = Recipes.objects.get(pk=pk)
-        except Recipes.DoesNotExist:
-            return Response(
-                {"detail": "Рецепт не найден."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+    @add_shopping_cart.mapping.delete
+    def delete_shopping_cart(self, request, pk=None):
+        recipe = get_object_or_404(Recipes, pk=pk)
+        ShoppingCart.objects.filter(user=request.user, recipes=recipe).delete()
+        return Response(
+            {"detail": "Рецепт удален из списка покупок."},
+            status=status.HTTP_204_NO_CONTENT,
+        )
 
-        if request.method == "DELETE":
-            FavoriteRecipe.objects.filter(
-                user=request.user, recipes=recipe
-            ).delete()
-            return Response(
-                {"detail": "Рецепт удален из избранного."},
-                status=status.HTTP_204_NO_CONTENT,
-            )
+    @action(methods=["post"], detail=True)
+    def favorite(self, request, pk=None):
+        recipe = get_object_or_404(Recipes, pk=pk)
 
         favorite, created = FavoriteRecipe.objects.get_or_create(
             user=request.user, recipes=recipe
@@ -85,3 +73,14 @@ class RecipesViewSet(viewsets.ModelViewSet):
                 {"detail": "Рецепт уже находится в избранном."},
                 status=status.HTTP_200_OK,
             )
+
+    @favorite.mapping.delete
+    def delete_favorite(self, request, pk=None):
+        recipe = get_object_or_404(Recipes, pk=pk)
+        FavoriteRecipe.objects.filter(
+            user=request.user, recipes=recipe
+        ).delete()
+        return Response(
+            {"detail": "Рецепт удален из избранного."},
+            status=status.HTTP_204_NO_CONTENT,
+        )

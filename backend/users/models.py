@@ -1,15 +1,26 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-User = get_user_model()
+
+class CustomUser(AbstractUser):
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+
+    username = models.CharField(
+        max_length=128, unique=True,
+        verbose_name='Ник-нейм пользователя')
+    email = models.EmailField(blank=False, unique=True,
+                              verbose_name='Электронная почта')
+    first_name = models.CharField('Имя', max_length=128)
+    last_name = models.CharField('Фамилия', max_length=128)
 
 
 class Followers(models.Model):
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="following"
+        CustomUser, on_delete=models.CASCADE, related_name="following"
     )
     subscriber = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="followers"
+        CustomUser, on_delete=models.CASCADE, related_name="followers"
     )
 
     def __str__(self) -> str:

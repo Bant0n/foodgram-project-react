@@ -1,12 +1,12 @@
 from rest_framework import serializers
-from .models import User, Followers
+from .models import CustomUser, Followers
 
 
 class UserSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = (
             "id",
             "username",
