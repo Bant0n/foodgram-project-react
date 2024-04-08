@@ -1,7 +1,6 @@
 from ingredients.models import IngredientsAmount
 from ingredients.serializers import (
     AmountIngredients,
-    IngredientsSerializer,
     ReadIngredientSerializer,
 )
 from rest_framework import serializers
