@@ -1,15 +1,31 @@
 from rest_framework import serializers
 
-from .models import Ingredients
+from .models import Ingredients, IngredientsAmount
 
 
 class IngredientsSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Ingredients
-        fields = ("id", "name", "amount", "measurement_unit")
+        fields = ("id", "name", "measurement_unit",)
 
 
-class CreateIngredientsSerializer(serializers.ModelSerializer):
+class AmountIngredients(serializers.ModelSerializer):
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=Ingredients.objects.all(),
+    )
+
     class Meta:
-        model = Ingredients
-        fields = ("id", "amount",)
+        model = IngredientsAmount
+        fields = ("id", "amount")
+
+
+class ReadIngredientSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source="ingredient.name")
+    measurement_unit = serializers.CharField(
+        source="ingredient.measurement_unit"
+    )
+
+    class Meta:
+        model = IngredientsAmount
+        fields = ("id", "name", "measurement_unit", "amount")

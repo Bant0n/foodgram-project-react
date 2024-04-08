@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import OuterRef
-from ingredients.models import Ingredients
 from tags.models import Tag
 
 User = get_user_model()
@@ -34,12 +33,14 @@ class Recipes(models.Model):
     name = models.CharField(max_length=64)
     image = models.ImageField(upload_to="recipes/", null=True, blank=True)
     text = models.TextField()
-    ingredients = models.ManyToManyField(Ingredients)
+    ingredients = models.ManyToManyField(
+        'ingredients.Ingredients', through="ingredients.IngredientsAmount"
+    )
     tags = models.ManyToManyField(Tag)
     cooking_time = models.PositiveIntegerField()
 
     objects = models.Manager()
-    favorite_and_shopping_cart = FavoriteAndShoppingCartManager()
+    favorite_and_shopping_cart = FavoriteAndShoppingCartQuerySet.as_manager()
 
     def __str__(self):
         return self.name

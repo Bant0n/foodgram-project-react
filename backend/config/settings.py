@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'djoser',
     'django_extensions',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -82,7 +83,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.getenv('POSTGRES_DB', 'django'),
+#         'NAME': os.getenv('DB_NAME', 'django'),
 #         'USER': os.getenv('POSTGRES_USER', 'django'),
 #         'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
 #         'HOST': os.getenv('DB_HOST', ''),
@@ -118,7 +119,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-RU'
 
 TIME_ZONE = 'UTC'
 
@@ -145,17 +146,18 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 DJOSER = {
+    'LOGIN_FIELD': 'email',
     'SERIALIZERS': {
         'user': 'users.serializers.UserSerializer',
-        'user_list': 'users.serializers.UserSerializer',
         'current_user': 'users.serializers.UserSerializer',
+        'user_list': 'users.serializers.UserSerializer',
         'user_create': 'users.serializers.UserSerializer',
     },
     'HIDE_USERS': False,
     'PERMISSIONS': {
         'user': ['rest_framework.permissions.IsAuthenticatedOrReadOnly'],
         'user_list': ['rest_framework.permissions.AllowAny'],
-        'user_create': ['rest_framework.permissions.IsAuthenticatedOrReadOnly'],
+        'user_create': ['rest_framework.permissions.AllowAny'],
     },
 }
 
@@ -167,5 +169,9 @@ DJOSER = {
 #         'rest_framework.permissions.AllowAny',
 #     )
 # }
+REST_FRAMEWORK = {
+    # ВАШИ НАСТРОЙКИ
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
 
 AUTH_USER_MODEL = 'users.CustomUser'

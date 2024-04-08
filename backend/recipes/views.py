@@ -9,18 +9,20 @@ from django.shortcuts import get_object_or_404
 
 class RecipesViewSet(viewsets.ModelViewSet):
     queryset = Recipes.objects.all()
+    serializer_class = RecipesSerializer
 
     def get_queryset(self):
-        if self.request.user.is_authenticated:
+        user_id = self.request.user.id
+        if user_id is not None:
             qs = Recipes.favorite_and_shopping_cart.favorite_and_shopping_cart(
-                self.request.user
+                user_id
             )
         else:
             qs = Recipes.objects.all()
         return qs
 
     def get_serializer_class(self):
-        if self.action in ("create", "update"):
+        if self.action in ("create", "update", "partial_update"):
             return RecipesCreateSerializer
         return RecipesSerializer
 
@@ -40,11 +42,10 @@ class RecipesViewSet(viewsets.ModelViewSet):
                 {"detail": "Рецепт добавлен в корзину."},
                 status=status.HTTP_201_CREATED,
             )
-        else:
-            return Response(
-                {"detail": "Рецепт уже находится в корзине."},
-                status=status.HTTP_200_OK,
-            )
+        return Response(
+            {"detail": "Рецепт уже находится в корзине."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     @add_shopping_cart.mapping.delete
     def delete_shopping_cart(self, request, pk=None):
@@ -68,11 +69,10 @@ class RecipesViewSet(viewsets.ModelViewSet):
                 {"detail": "Рецепт добавлен в избранное."},
                 status=status.HTTP_201_CREATED,
             )
-        else:
-            return Response(
-                {"detail": "Рецепт уже находится в избранном."},
-                status=status.HTTP_200_OK,
-            )
+        return Response(
+            {"detail": "Рецепт уже находится в избранном."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     @favorite.mapping.delete
     def delete_favorite(self, request, pk=None):

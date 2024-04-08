@@ -3,16 +3,17 @@ from django.db import models
 
 
 class CustomUser(AbstractUser):
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["username", "first_name", "last_name"]
 
     username = models.CharField(
-        max_length=128, unique=True,
-        verbose_name='Ник-нейм пользователя')
-    email = models.EmailField(blank=False, unique=True,
-                              verbose_name='Электронная почта')
-    first_name = models.CharField('Имя', max_length=128)
-    last_name = models.CharField('Фамилия', max_length=128)
+        max_length=128, unique=True, verbose_name="Ник-нейм пользователя"
+    )
+    email = models.EmailField(
+        blank=False, unique=True, verbose_name="Электронная почта"
+    )
+    first_name = models.CharField("Имя", max_length=128)
+    last_name = models.CharField("Фамилия", max_length=128)
 
 
 class Followers(models.Model):
@@ -24,4 +25,4 @@ class Followers(models.Model):
     )
 
     def __str__(self) -> str:
-        return f'На {self.author} подписан {self.subscriber}'
+        return f"На {self.author} подписан {self.subscriber}"

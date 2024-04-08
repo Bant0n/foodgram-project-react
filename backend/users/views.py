@@ -39,13 +39,12 @@ class UserViewSet(UserViewSet):
 
     @action(detail=False, methods=["get"])
     def subscriptions(self, request):
-        qs = Followers.objects.filter(subscriber=self.request.user)
+        qs = self.request.user.followers.all()
         serializer = FollowersSerializer(qs, many=True)
-        print(serializer.data)
         return Response(
             {
                 "count": qs.count(),
-                "subscriptions": serializer.data,
+                "results": serializer.data,
             },
             status=status.HTTP_200_OK,
         )
