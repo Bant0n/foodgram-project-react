@@ -43,7 +43,9 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'djoser',
     'django_extensions',
+    'django_filters',
     'drf_spectacular',
+    'colorfield',
 ]
 
 MIDDLEWARE = [
@@ -148,10 +150,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 DJOSER = {
     'LOGIN_FIELD': 'email',
     'SERIALIZERS': {
+        'user_list': 'users.serializers.UserSerializer',
+        'user_create': 'users.serializers.UserCreateSerializer',
         'user': 'users.serializers.UserSerializer',
         'current_user': 'users.serializers.UserSerializer',
-        'user_list': 'users.serializers.UserSerializer',
-        'user_create': 'users.serializers.UserSerializer',
+        'me': 'users.serializers.UserSerializer',
     },
     'HIDE_USERS': False,
     'PERMISSIONS': {
@@ -161,16 +164,15 @@ DJOSER = {
     },
 }
 
-# REST_FRAMEWORK = {
-#     'DEFAULT_AUTHENTICATION_CLASSES': (
-#         "rest_framework.authentication.TokenAuthentication",
-#     ),
-#     'DEFAULT_PERMISSION_CLASSES': (
-#         'rest_framework.permissions.AllowAny',
-#     )
-# }
 REST_FRAMEWORK = {
-    # ВАШИ НАСТРОЙКИ
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        "rest_framework.authentication.TokenAuthentication",
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.AllowAny',
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 6,
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 

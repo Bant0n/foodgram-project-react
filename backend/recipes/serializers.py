@@ -1,11 +1,12 @@
-from ingredients.models import IngredientsAmount
-from ingredients.serializers import (
-    AmountIngredients,
-    ReadIngredientSerializer,
+from django_restframework_base64_image_field.base64_image_field import (
+    Base64ImageField,
 )
+from ingredients.models import IngredientsAmount
+from ingredients.serializers import AmountIngredients, ReadIngredientSerializer
 from rest_framework import serializers
 from tags.serializers import TagSerializer
 from users.serializers import UserSerializer
+
 from .models import Recipes
 
 
@@ -15,6 +16,8 @@ class RecipesSerializer(serializers.ModelSerializer):
     ingredients = ReadIngredientSerializer(
         many=True, source="recipe_ingredients"
     )
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipes
@@ -23,15 +26,24 @@ class RecipesSerializer(serializers.ModelSerializer):
             "tags",
             "author",
             "ingredients",
+            'is_favorited',
+            'is_in_shopping_cart',
             "name",
             "image",
             "text",
             "cooking_time",
         )
 
+    def get_is_in_shopping_cart(self, obj):
+        return False
+
+    def get_is_favorited(self, obj):
+        return False
+
 
 class RecipesCreateSerializer(serializers.ModelSerializer):
     ingredients = AmountIngredients(many=True)
+    image = Base64ImageField()
 
     class Meta:
         model = Recipes

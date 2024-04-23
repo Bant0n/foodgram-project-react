@@ -1,14 +1,20 @@
 from django.shortcuts import get_object_or_404
+# from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from .models import Followers, CustomUser
+from .models import CustomUser, Followers
 from .serializers import FollowersSerializer
 
 
 class UserViewSet(UserViewSet):
+    permission_classes = [AllowAny]
+    # filter_backends = (DjangoFilterBackend, )
+    # filterset_fields = ("author",)
+
     @action(detail=True, methods=["post"])
     def subscribe(self, request, id=None):
         author = get_object_or_404(CustomUser, id=id)
@@ -48,3 +54,10 @@ class UserViewSet(UserViewSet):
             },
             status=status.HTTP_200_OK,
         )
+
+    @action(
+        detail=False, methods=["get"], permission_classes=[IsAuthenticated]
+    )
+    def me(self, request):
+        self.get_object = self.get_instance
+        return self.retrieve(request)

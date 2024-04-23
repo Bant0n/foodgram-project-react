@@ -1,15 +1,18 @@
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models import FavoriteRecipe, Recipes, ShoppingCart
 from .serializers import RecipesCreateSerializer, RecipesSerializer
-from django.shortcuts import get_object_or_404
 
 
 class RecipesViewSet(viewsets.ModelViewSet):
     queryset = Recipes.objects.all()
     serializer_class = RecipesSerializer
+    filter_backends = (DjangoFilterBackend, )
+    filterset_fields = ("author",)
 
     def get_queryset(self):
         user_id = self.request.user.id

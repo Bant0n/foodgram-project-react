@@ -7,7 +7,7 @@ class CustomUser(AbstractUser):
     REQUIRED_FIELDS = ["username", "first_name", "last_name"]
 
     username = models.CharField(
-        max_length=128, unique=True, verbose_name="Ник-нейм пользователя"
+        max_length=150, unique=True, verbose_name="Ник-нейм пользователя"
     )
     email = models.EmailField(
         blank=False, unique=True, verbose_name="Электронная почта"
