@@ -21,6 +21,7 @@ from djoser.serializers import UserSerializer, UserCreateSerializer
 #     def get_is_subscribed(self, obj):
 #         return False
 
+
 class UserSerializer(UserSerializer):
     is_subscribed = serializers.SerializerMethodField()
 
@@ -32,7 +33,7 @@ class UserSerializer(UserSerializer):
             "first_name",
             "last_name",
             "email",
-            'is_subscribed'
+            "is_subscribed",
         )
 
     def get_is_subscribed(self, obj):
@@ -40,7 +41,7 @@ class UserSerializer(UserSerializer):
 
 
 class UserCreateSerializer(UserCreateSerializer):
-    username = serializers.RegexField(r'^[\w.@+-]+\Z')
+    username = serializers.RegexField(r"^[\w.@+-]+\Z")
 
     class Meta:
         model = CustomUser
@@ -50,7 +51,7 @@ class UserCreateSerializer(UserCreateSerializer):
             "first_name",
             "last_name",
             "email",
-            'password'
+            "password",
         )
 
 

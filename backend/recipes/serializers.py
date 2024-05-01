@@ -26,8 +26,8 @@ class RecipesSerializer(serializers.ModelSerializer):
             "tags",
             "author",
             "ingredients",
-            'is_favorited',
-            'is_in_shopping_cart',
+            "is_favorited",
+            "is_in_shopping_cart",
             "name",
             "image",
             "text",
@@ -43,6 +43,7 @@ class RecipesSerializer(serializers.ModelSerializer):
 
 class RecipesCreateSerializer(serializers.ModelSerializer):
     ingredients = AmountIngredients(many=True)
+    # ingredients = ReadIngredientSerializer(many=True)
     image = Base64ImageField()
 
     class Meta:
@@ -78,25 +79,21 @@ class RecipesCreateSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
+        ingredients_data = validated_data.pop('ingredients')
+        tags_data = validated_data.pop('tags')
+        for tags in tags_data:
+            instance.tags.clear()
+            instance.tags.add(tags)
 
-        tags_data = validated_data.pop("tags", instance.tags)
-
-        ingredients_data = validated_data.pop(
-            "ingredients", instance.ingredients
+        instance.ingredients.clear()
+        IngredientsAmount.objects.bulk_create(
+            [
+                IngredientsAmount(
+                    ingredient=ingredient["id"],
+                    recipe=instance,
+                    amount=ingredient["amount"],
+                )
+                for ingredient in ingredients_data
+            ]
         )
-
-        for attr, value in validated_data.items():
-
-            setattr(instance, attr, value)
-
-        instance.save()
-
-        if tags_data is not None:
-
-            instance.tags.set(tags_data)
-
-        if ingredients_data is not None:
-
-            instance.ingredients.set(ingredients_data)
-
         return instance

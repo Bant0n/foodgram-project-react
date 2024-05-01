@@ -21,9 +21,12 @@ class AmountIngredients(serializers.ModelSerializer):
 
 
 class ReadIngredientSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source="ingredient.name")
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=Ingredients.objects.all(),
+    )
+    name = serializers.CharField(source="ingredient.name", required=False)
     measurement_unit = serializers.CharField(
-        source="ingredient.measurement_unit"
+        source="ingredient.measurement_unit", required=False
     )
 
     class Meta:
