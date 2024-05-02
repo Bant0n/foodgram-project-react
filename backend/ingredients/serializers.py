@@ -19,6 +19,14 @@ class AmountIngredients(serializers.ModelSerializer):
         model = IngredientsAmount
         fields = ("id", "amount")
 
+    def validate_amount(self, value):
+        print(value)
+        if value <= 0:
+            raise serializers.ValidationError(
+                "Количество должно быть больше нуля"
+            )
+        return value
+
 
 class ReadIngredientSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(

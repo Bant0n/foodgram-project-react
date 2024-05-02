@@ -16,7 +16,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
     queryset = Recipes.objects.all()
     serializer_class = RecipesSerializer
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ("author",)
+    filterset_fields = ("author", )
 
     def get_queryset(self):
         user_id = self.request.user.id

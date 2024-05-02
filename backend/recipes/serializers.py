@@ -43,7 +43,6 @@ class RecipesSerializer(serializers.ModelSerializer):
 
 class RecipesCreateSerializer(serializers.ModelSerializer):
     ingredients = AmountIngredients(many=True)
-    # ingredients = ReadIngredientSerializer(many=True)
     image = Base64ImageField()
 
     class Meta:
@@ -56,6 +55,22 @@ class RecipesCreateSerializer(serializers.ModelSerializer):
             "text",
             "cooking_time",
         )
+
+    def validate_cooking_time(self, value):
+        print(value)
+        if value <= 0:
+            raise serializers.ValidationError(
+                "Время приготовления должно быть больше нуля"
+            )
+        return value
+
+    def validate_ingredients(self, value):
+        print(value)
+        if not value:
+            raise serializers.ValidationError(
+                "Необходимо добавить ингредиенты"
+            )
+        return value
 
     def to_representation(self, instance):
         serializer = RecipesSerializer(instance, context=self.context)
@@ -79,8 +94,8 @@ class RecipesCreateSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
-        ingredients_data = validated_data.pop('ingredients')
-        tags_data = validated_data.pop('tags')
+        ingredients_data = validated_data.pop("ingredients")
+        tags_data = validated_data.pop("tags")
         for tags in tags_data:
             instance.tags.clear()
             instance.tags.add(tags)

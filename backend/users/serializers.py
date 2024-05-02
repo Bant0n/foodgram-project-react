@@ -54,6 +54,14 @@ class UserCreateSerializer(UserCreateSerializer):
             "password",
         )
 
+    def validate_username(self, value):
+        print(value)
+        if len(value) > 150:
+            raise serializers.ValidationError(
+                'Длина поля "username" не должна превышать 150 символов'
+            )
+        return value
+
 
 class FollowersSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
