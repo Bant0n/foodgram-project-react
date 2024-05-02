@@ -5,16 +5,18 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models import FavoriteRecipe, Recipes, ShoppingCart
+from .permissions import IsAuthorOrReadOnly
 from .serializers import RecipesCreateSerializer, RecipesSerializer
 
 
 class RecipesViewSet(viewsets.ModelViewSet):
+    permission_classes = [
+        IsAuthorOrReadOnly,
+    ]
     queryset = Recipes.objects.all()
     serializer_class = RecipesSerializer
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = (
-        "author",
-    )
+    filterset_fields = ("author",)
 
     def get_queryset(self):
         user_id = self.request.user.id
