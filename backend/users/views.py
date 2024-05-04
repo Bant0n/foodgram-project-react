@@ -58,7 +58,7 @@ class UserViewSet(UserViewSet):
         else:
             return Response(
                 {"errors": "Вы уже подписаны на этого пользователя."},
-                status=status.HTTP_404_NOT_FOUND
+                status=status.HTTP_400_BAD_REQUEST
             )
 
     @subscribe.mapping.delete
