@@ -1,6 +1,4 @@
-from django_restframework_base64_image_field.base64_image_field import (
-    Base64ImageField,
-)
+from drf_extra_fields.fields import Base64ImageField
 from ingredients.models import IngredientsAmount
 from ingredients.serializers import AmountIngredients, ReadIngredientSerializer
 from rest_framework import serializers
@@ -55,6 +53,14 @@ class RecipesCreateSerializer(serializers.ModelSerializer):
             "text",
             "cooking_time",
         )
+
+    def validate_image(self, value):
+        print(value)
+        if not value:
+            raise serializers.ValidationError(
+                "Необходимо добавить изображение"
+            )
+        return value
 
     def validate_cooking_time(self, value):
         print(value)
@@ -112,3 +118,14 @@ class RecipesCreateSerializer(serializers.ModelSerializer):
             ]
         )
         return instance
+
+
+class ShortRecipesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recipes
+        fields = (
+            "id",
+            "name",
+            "image",
+            "cooking_time",
+        )

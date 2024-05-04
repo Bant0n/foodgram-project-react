@@ -1,11 +1,13 @@
 from django.shortcuts import get_object_or_404
+
 # from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
+from recipes.serializers import ShortRecipesSerializer
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-
+from recipes.models import Recipes
 from .models import CustomUser, Followers
 from .serializers import FollowersSerializer
 
@@ -18,20 +20,45 @@ class UserViewSet(UserViewSet):
     @action(detail=True, methods=["post"])
     def subscribe(self, request, id=None):
         author = get_object_or_404(CustomUser, id=id)
-
+        recipes = Recipes.objects.filter(author=author)
+        print(recipes)
+        print(author.recipes_set.all())
         subscriber = self.request.user
-        follow, created = Followers.objects.get_or_create(
+        _, created = Followers.objects.get_or_create(
             author=author, subscriber=subscriber
         )
         if created:
             return Response(
-                {"detail": "Вы подписались на пользователя."},
+                {
+                    "email": author.email,
+                    "id": author.id,
+                    "username": author.username,
+                    "first_name": author.first_name,
+                    "last_name": author.last_name,
+                    "is_subscribed": created,
+                    "recipes": ShortRecipesSerializer(recipes, many=True).data,
+                    "recipes_count": author.recipes_set.count(),
+                },
                 status=status.HTTP_201_CREATED,
             )
+        # else:
+        #     return Response(
+        #         {
+        #             "email": author.email,
+        #             "id": author.id,
+        #             "username": author.username,
+        #             "first_name": author.first_name,
+        #             "last_name": author.last_name,
+        #             "is_subscribed": created,
+        #             "recipes": ShortRecipesSerializer(recipes, many=True).data,
+        #             "recipes_count": author.recipes_set.count(),
+        #         },
+        #         status=status.HTTP_201_CREATED,
+        #     )
         else:
             return Response(
-                {"detail": "Вы уже подписаны на пользователя."},
-                status=status.HTTP_200_OK,
+                {"errors": "Вы уже подписаны на этого пользователя."},
+                status=status.HTTP_400_BAD_REQUEST
             )
 
     @subscribe.mapping.delete
