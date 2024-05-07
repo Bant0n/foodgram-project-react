@@ -165,6 +165,7 @@ DJOSER = {
         'user_list': ['rest_framework.permissions.AllowAny'],
         'user_create': ['rest_framework.permissions.AllowAny'],
     },
+    'PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
 }
 
 REST_FRAMEWORK = {
