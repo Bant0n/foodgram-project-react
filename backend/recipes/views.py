@@ -6,7 +6,11 @@ from rest_framework.response import Response
 
 from .models import FavoriteRecipe, Recipes, ShoppingCart
 from .permissions import IsAuthorOrReadOnly
-from .serializers import RecipesCreateSerializer, RecipesSerializer
+from .serializers import (
+    RecipesCreateSerializer,
+    RecipesSerializer,
+    ShortRecipesSerializer,
+)
 
 
 class RecipesViewSet(viewsets.ModelViewSet):
@@ -16,7 +20,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
     queryset = Recipes.objects.all()
     serializer_class = RecipesSerializer
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ("author", )
+    filterset_fields = ("author",)
 
     def get_queryset(self):
         user_id = self.request.user.id
@@ -37,24 +41,16 @@ class RecipesViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)
 
     @action(methods=["post"], detail=True)
-    def add_shopping_cart(self, request, pk=None):
-        recipe = get_object_or_404(Recipes, pk=pk)
-
-        shopping_cart_item, created = ShoppingCart.objects.get_or_create(
-            user=request.user, recipes=recipe
+    def shopping_cart(self, request, pk=None):
+        instance_recipe = get_object_or_404(Recipes, pk=pk)
+        ShoppingCart.objects.get_or_create(
+            user=request.user, recipes=instance_recipe
         )
+        serializer = ShortRecipesSerializer(instance_recipe)
+        print(instance_recipe)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        if created:
-            return Response(
-                {"detail": "Рецепт добавлен в корзину."},
-                status=status.HTTP_201_CREATED,
-            )
-        return Response(
-            {"detail": "Рецепт уже находится в корзине."},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-
-    @add_shopping_cart.mapping.delete
+    @shopping_cart.mapping.delete
     def delete_shopping_cart(self, request, pk=None):
         recipe = get_object_or_404(Recipes, pk=pk)
         ShoppingCart.objects.filter(user=request.user, recipes=recipe).delete()
@@ -66,20 +62,13 @@ class RecipesViewSet(viewsets.ModelViewSet):
     @action(methods=["post"], detail=True)
     def favorite(self, request, pk=None):
         recipe = get_object_or_404(Recipes, pk=pk)
-
-        favorite, created = FavoriteRecipe.objects.get_or_create(
+        FavoriteRecipe.objects.get_or_create(
             user=request.user, recipes=recipe
         )
 
-        if created:
-            return Response(
-                {"detail": "Рецепт добавлен в избранное."},
-                status=status.HTTP_201_CREATED,
-            )
-        return Response(
-            {"detail": "Рецепт уже находится в избранном."},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+        serializer = ShortRecipesSerializer(recipe)
+        print(recipe)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @favorite.mapping.delete
     def delete_favorite(self, request, pk=None):

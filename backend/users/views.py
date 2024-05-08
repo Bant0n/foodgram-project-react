@@ -4,8 +4,10 @@ from recipes.models import Recipes
 from recipes.serializers import ShortRecipesSerializer
 from rest_framework import status
 from rest_framework.decorators import action
-# from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import (
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+)
 from rest_framework.response import Response
 
 from .models import CustomUser, Followers
@@ -13,8 +15,7 @@ from .serializers import FollowersSerializer
 
 
 class UserViewSet(UserViewSet):
-    permission_classes = [IsAuthenticated]
-    # pagination_class = [LimitOffsetPagination]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     @action(detail=True, methods=["post"])
     def subscribe(self, request, id=None):
@@ -63,7 +64,9 @@ class UserViewSet(UserViewSet):
         methods=["get"],
     )
     def subscriptions(self, request):
-        qs = self.filter_queryset(Followers.objects.filter(author=request.user))
+        qs = self.filter_queryset(
+            Followers.objects.filter(author=request.user)
+        )
         page = self.paginate_queryset(qs)
         if page is not None:
             serializer = FollowersSerializer(page, many=True)
