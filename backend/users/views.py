@@ -53,10 +53,17 @@ class UserViewSet(UserViewSet):
     @subscribe.mapping.delete
     def delete_subscribe(self, request, id=None):
         author = get_object_or_404(CustomUser, id=id)
-        Followers.objects.filter(author=author).delete()
+        follower_item = Followers.objects.filter(subscriber=author).exists()
+        print(follower_item)
+        if follower_item:
+            Followers.objects.filter(subscriber=author).delete()
+            return Response(
+                {"detail": "Вы отписались от пользователя."},
+                status=status.HTTP_204_NO_CONTENT,
+            )
         return Response(
-            {"detail": "Вы отписались от пользователя."},
-            status=status.HTTP_204_NO_CONTENT,
+            {"detail": "Вы не подписаны на этого пользователя."},
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     @action(
