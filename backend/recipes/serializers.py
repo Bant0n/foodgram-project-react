@@ -55,15 +55,14 @@ class RecipesCreateSerializer(serializers.ModelSerializer):
         )
 
     def validate_image(self, value):
-        print(value)
         if not value:
             raise serializers.ValidationError(
                 "Необходимо добавить изображение"
             )
+
         return value
 
     def validate_cooking_time(self, value):
-        print(value)
         if value <= 0:
             raise serializers.ValidationError(
                 "Время приготовления должно быть больше нуля"
@@ -71,7 +70,11 @@ class RecipesCreateSerializer(serializers.ModelSerializer):
         return value
 
     def validate_ingredients(self, value):
-        print(value)
+        if len(set(value)) != len(value):
+            raise serializers.ValidationError(
+                "Вы передали одинаковые ингредиенты"
+            )
+
         if not value:
             raise serializers.ValidationError(
                 "Необходимо добавить ингредиенты"

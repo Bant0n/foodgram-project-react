@@ -48,7 +48,6 @@ class RecipesViewSet(viewsets.ModelViewSet):
         )
         if created:
             serializer = ShortRecipesSerializer(recipe)
-            print(recipe)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(
             {"detail": "Рецепт уже добавлен в корзину."},
@@ -58,12 +57,10 @@ class RecipesViewSet(viewsets.ModelViewSet):
     @shopping_cart.mapping.delete
     def delete_shopping_cart(self, request, pk=None):
         recipe = get_object_or_404(Recipes, pk=pk)
-        # recipe = Recipes.object.filter(pk=pk)
         shopping_cart_item = ShoppingCart.objects.filter(
             user=request.user, recipes=recipe
         ).exists()
 
-        print(shopping_cart_item)
         if shopping_cart_item:
             ShoppingCart.objects.filter(
                 user=request.user, recipes=recipe
@@ -87,7 +84,6 @@ class RecipesViewSet(viewsets.ModelViewSet):
 
         if created:
             serializer = ShortRecipesSerializer(recipe)
-            print(recipe)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(
