@@ -70,10 +70,10 @@ class RecipesCreateSerializer(serializers.ModelSerializer):
         return value
 
     def validate_ingredients(self, value):
-        if len(set(value)) != len(value):
-            raise serializers.ValidationError(
-                "Вы передали одинаковые ингредиенты"
-            )
+        # if len(set(value)) != len(value):
+        #     raise serializers.ValidationError(
+        #         "Вы передали одинаковые ингредиенты"
+        #     )
 
         if not value:
             raise serializers.ValidationError(

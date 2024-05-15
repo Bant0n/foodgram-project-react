@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import CustomUser, Followers
 from djoser.serializers import UserSerializer, UserCreateSerializer
-# from recipes.serializers import ShortRecipesSerializer
+
 from recipes.models import Recipes
 
 
@@ -49,7 +49,6 @@ class UserCreateSerializer(UserCreateSerializer):
         )
 
     def validate_username(self, value):
-        print(value)
         if len(value) > 150:
             raise serializers.ValidationError(
                 'Длина поля "username" не должна превышать 150 символов'
@@ -57,13 +56,6 @@ class UserCreateSerializer(UserCreateSerializer):
         return value
 
 
-# class FollowersSerializer(serializers.ModelSerializer):
-#     author = UserSerializer(read_only=True)
-
-
-#     class Meta:
-#         model = Followers
-#         fields = ("author",)
 class FollowersSerializer(serializers.ModelSerializer):
     email = serializers.CharField(source="subscriber.email", read_only=True)
     id = serializers.IntegerField(source="subscriber.id", read_only=True)
@@ -89,8 +81,8 @@ class FollowersSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "is_subscribed",
-            'recipes',
-            'recipes_count',
+            "recipes",
+            "recipes_count",
         )
 
     def get_is_subscribed(self, obj):
