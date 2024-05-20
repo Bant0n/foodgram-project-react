@@ -147,7 +147,6 @@ class RecipesViewSet(viewsets.ModelViewSet):
         response["Content-Disposition"] = (
             'attachment; filename="shopping_list.txt"'
         )
-
         response.write(f"Список покупок для {request.user.username}:\n")
 
         for name, amount, unit in summed_ingredients:
