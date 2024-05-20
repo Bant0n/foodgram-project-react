@@ -33,10 +33,16 @@ class RecipesSerializer(serializers.ModelSerializer):
         )
 
     def get_is_in_shopping_cart(self, obj):
-        return False
+        user = self.context.get("request").user
+        if user.is_anonymous:
+            return False
+        return user.shoppingcart_set.filter(recipes=obj).exists()
 
     def get_is_favorited(self, obj):
-        return False
+        user = self.context.get("request").user
+        if user.is_anonymous:
+            return False
+        return user.favoriterecipe_set.filter(recipes=obj).exists()
 
 
 class RecipesCreateSerializer(serializers.ModelSerializer):
@@ -70,10 +76,6 @@ class RecipesCreateSerializer(serializers.ModelSerializer):
         return value
 
     def validate_ingredients(self, value):
-        # if len(set(value)) != len(value):
-        #     raise serializers.ValidationError(
-        #         "Вы передали одинаковые ингредиенты"
-        #     )
 
         if not value:
             raise serializers.ValidationError(

@@ -28,7 +28,7 @@ class UserViewSet(UserViewSet):
         recipes = Recipes.objects.filter(author=author)
         subscriber = self.request.user
         _, created = Followers.objects.get_or_create(
-            author=subscriber, subscriber=author
+            author=author, subscriber=subscriber
         )
         if created:
             return Response(
@@ -53,10 +53,11 @@ class UserViewSet(UserViewSet):
     @subscribe.mapping.delete
     def delete_subscribe(self, request, id=None):
         author = get_object_or_404(CustomUser, id=id)
-        follower_item = Followers.objects.filter(subscriber=author).exists()
-        print(follower_item)
+        follower_item = Followers.objects.filter(
+            subscriber=request.user
+        ).exists()
         if follower_item:
-            Followers.objects.filter(subscriber=author).delete()
+            Followers.objects.filter(author=author).delete()
             return Response(
                 {"detail": "Вы отписались от пользователя."},
                 status=status.HTTP_204_NO_CONTENT,
@@ -72,13 +73,14 @@ class UserViewSet(UserViewSet):
     )
     def subscriptions(self, request):
         qs = self.filter_queryset(
-            Followers.objects.filter(author=request.user)
+            Followers.objects.filter(subscriber=request.user)
         )
         page = self.paginate_queryset(qs)
         if page is not None:
             serializer = FollowersSerializer(page, many=True)
             return self.get_paginated_response(serializer.data)
         return Response(qs.data)
+        # return Response({"data": "aaaa"})
 
     @action(
         detail=False, methods=["get"], permission_classes=[IsAuthenticated]

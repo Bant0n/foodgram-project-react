@@ -25,4 +25,4 @@ class Followers(models.Model):
     )
 
     def __str__(self) -> str:
-        return f"На {self.subscriber} подписан {self.author}"
+        return f"На {self.author} подписан {self.subscriber}"

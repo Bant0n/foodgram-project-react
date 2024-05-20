@@ -31,7 +31,10 @@ class UserSerializer(UserSerializer):
         )
 
     def get_is_subscribed(self, obj):
-        return False
+        user = self.context.get("request").user
+        if user.is_anonymous:
+            return False
+        return user.followers.filter(author=obj).exists()
 
 
 class UserCreateSerializer(UserCreateSerializer):
@@ -57,16 +60,14 @@ class UserCreateSerializer(UserCreateSerializer):
 
 
 class FollowersSerializer(serializers.ModelSerializer):
-    email = serializers.CharField(source="subscriber.email", read_only=True)
-    id = serializers.IntegerField(source="subscriber.id", read_only=True)
-    username = serializers.CharField(
-        source="subscriber.username", read_only=True
-    )
+    email = serializers.CharField(source="author.email", read_only=True)
+    id = serializers.IntegerField(source="author.id", read_only=True)
+    username = serializers.CharField(source="author.username", read_only=True)
     first_name = serializers.CharField(
-        source="subscriber.first_name", read_only=True
+        source="author.first_name", read_only=True
     )
     last_name = serializers.CharField(
-        source="subscriber.last_name", read_only=True
+        source="author.last_name", read_only=True
     )
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
@@ -86,7 +87,7 @@ class FollowersSerializer(serializers.ModelSerializer):
         )
 
     def get_is_subscribed(self, obj):
-        return True
+        return Followers.objects.filter(subscriber=obj.subscriber).exists()
 
     def get_recipes(self, obj):
         recipes = obj.subscriber.recipes_set.all()

@@ -1,9 +1,13 @@
+from collections import defaultdict
+
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from .filters import RecipesFilter
 from .models import FavoriteRecipe, Recipes, ShoppingCart
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
@@ -14,6 +18,7 @@ from .serializers import (
 
 
 class RecipesViewSet(viewsets.ModelViewSet):
+    filterset_class = RecipesFilter
     permission_classes = [
         IsAuthorOrReadOnly,
     ]
@@ -99,7 +104,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
         ).exists()
 
         if favorite_cart_item:
-            ShoppingCart.objects.filter(
+            FavoriteRecipe.objects.filter(
                 user=request.user, recipes=recipe
             ).delete()
             return Response(
@@ -111,3 +116,39 @@ class RecipesViewSet(viewsets.ModelViewSet):
             {"detail": "Рецепта нет в списке избранного."},
             status=status.HTTP_400_BAD_REQUEST,
         )
+
+    @action(methods=["get"], detail=False)
+    def download_shopping_cart(self, request):
+
+        sums = defaultdict(int)
+
+        recipes = ShoppingCart.objects.filter(user=request.user).values(
+            "recipes__ingredients__name",
+            "recipes__ingredients__measurement_unit",
+            "recipes__recipe_ingredients__amount",
+        )
+
+        shoping_list = []
+
+        for recipe in recipes:
+            name = recipe["recipes__ingredients__name"]
+            unit = recipe["recipes__ingredients__measurement_unit"]
+            amount = recipe["recipes__recipe_ingredients__amount"]
+            shoping_list.append((name, amount, unit))
+        for name, amount, unit in shoping_list:
+            sums[(name, unit)] += amount
+        summed_ingredients = [
+            (name, amount, unit) for (name, unit), amount in sums.items()
+        ]
+
+        response = HttpResponse(content_type="text/plain; charset=utf-8")
+        response["Content-Disposition"] = (
+            'attachment; filename="shopping_list.txt"'
+        )
+
+        response.write(f"Список покупок для {request.user.username}:\n")
+
+        for name, amount, unit in summed_ingredients:
+            response.write(f"{name} - {amount} {unit}\n")
+
+        return response
