@@ -80,7 +80,6 @@ class UserViewSet(UserViewSet):
             serializer = FollowersSerializer(page, many=True)
             return self.get_paginated_response(serializer.data)
         return Response(qs.data)
-        # return Response({"data": "aaaa"})
 
     @action(
         detail=False, methods=["get"], permission_classes=[IsAuthenticated]

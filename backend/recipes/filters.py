@@ -7,7 +7,7 @@ class RecipesFilter(filter.FilterSet):
     is_in_shopping_cart = filter.BooleanFilter(
         method="get_is_in_shopping_cart"
     )
-    tags = filter.CharFilter(field_name="tags__slug")
+    tags = filter.AllValuesMultipleFilter(field_name="tags__slug")
 
     class Meta:
         model = Recipes

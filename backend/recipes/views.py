@@ -135,8 +135,10 @@ class RecipesViewSet(viewsets.ModelViewSet):
             unit = recipe["recipes__ingredients__measurement_unit"]
             amount = recipe["recipes__recipe_ingredients__amount"]
             shoping_list.append((name, amount, unit))
+
         for name, amount, unit in shoping_list:
             sums[(name, unit)] += amount
+
         summed_ingredients = [
             (name, amount, unit) for (name, unit), amount in sums.items()
         ]
