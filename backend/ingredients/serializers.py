@@ -20,7 +20,6 @@ class AmountIngredients(serializers.ModelSerializer):
         fields = ("id", "amount")
 
     def validate_amount(self, value):
-        print(value)
         if value <= 0:
             raise serializers.ValidationError(
                 "Количество должно быть больше нуля"
